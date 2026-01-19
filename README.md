@@ -1,33 +1,48 @@
 # LLM Behavioral Consistency Analyzer
 
-A framework for evaluating language model quality, consistency, and safety properties at scale.
+A framework for evaluating language model quality, consistency, and safety properties at scale—tested on both standard benchmarks and real-world topics I actually care about.
 
 ## Overview
 
-This tool systematically tests language models across multiple dimensions:
-- **Consistency**: Do semantically similar prompts produce consistent responses?
-- **Refusal behavior**: Does the model appropriately handle requests it can't fulfill?
-- **Output quality**: Are responses well-structured and appropriate?
+This tool systematically tests language models to answer: **"Does the AI give consistent, quality advice across different phrasings?"** This project serves as practice for the Anthropic Fellowship
 
-Built for evaluating AI systems in production environments where consistency and reliability matter.
+Built for practical evaluation scenarios like:
+- Does Claude give consistent Valorant agent recommendations?
+- Will GPT recommend safe strength training progressions?
+- Can AI maintain consistency when explaining tea brew methods?
 
-## Features
+## Why This Matters
 
-- ✅ Automated consistency testing across prompt variations
-- ✅ Configurable test iterations for statistical confidence
-- ✅ JSON output for integration with data pipelines
-- ✅ Extensible test framework
-- ✅ Support for multiple LLM providers
+LLMs are only useful if they're **consistent** and **reliable**. This framework measures both:
+- **Standard tests**: Ethics, safety, technical knowledge
+- **Domain-specific tests**: Gaming (Valorant/Super Smash Bros Ultimate), fitness, and tea culture
+- **Safety tests**: Refusal behavior, harmful advice detection
+- **Crossover tests**: Interdisciplinary connections
 
-## Use Cases
+## Real-World Test Categories
 
-- Testing model robustness before production deployment
-- Measuring output quality across model versions
-- Identifying edge cases and inconsistent behaviors
-- Tracking improvements over time
-- Quality assurance for AI-powered applications
+### Gaming
+- **Valorant strategy**: Agent recommendations for beginners
+- **Smash Bros fundamentals**: Core skills and improvement
+- **Competitive mindset**: Handling ranked scenarios
+
+### Strength Training
+- **Beginner programs**: Safe, effective starting points
+- **Progressive overload**: Building strength over time
+- **Recovery**: Rest periods and muscle recovery
+
+### Tea Culture
+- **Brewing techniques**: Optimal temps and steep times
+- **Tea recommendations**: Productivity, focus, relaxation
+- **Tea processing**: Green, black, oolong differences
+
+### Crossover Tests
+- Gaming skills vs. strength training parallels
+- Best tea for gaming sessions or workouts
+- Mental models that apply across domains
 
 ## Installation
+
 ```bash
 # Clone the repository
 git clone https://github.com/ajenaration/llm-behavior-analyzer.git
@@ -38,126 +53,138 @@ pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
-# Add your API keys to .env
+# Add your ANTHROPIC_API_KEY to .env
 ```
 
-## Configuration
+### Getting Your Free API Key
 
-Create a `.env` file with your API keys:
-```
-ANTHROPIC_API_KEY=your_key_here
-OPENAI_API_KEY=your_key_here
-```
+**Anthropic Claude (Recommended):**
+1. Go to https://console.anthropic.com
+2. Sign up (free) and get $5 in free credits (~2,500 API calls)
+3. Create an API key
+4. Add to `.env` file
 
-Modify `config.py` to adjust:
-- Number of test iterations
-- Temperature settings
-- Models to test
-- Output formats
 
-## Usage
+## Quick Start
 
-### Basic Analysis
+### Run Full Analysis
+
 ```bash
 python analyzer.py
 ```
 
-This runs the full test suite and saves results to `results/`.
+This runs both standard and personal test suites (~15 minutes).
 
-### Custom Tests
+### Run Specific Categories
+
 ```python
 from analyzer import LLMAnalyzer
+import prompts_personal
 
-# Initialize analyzer
-analyzer = LLMAnalyzer(model_name="claude")
+analyzer = LLMAnalyzer()
 
-# Run specific test
-test_case = {
-    "category": "custom",
-    "variations": [
-        "What is AI?",
-        "Explain artificial intelligence",
-        "Define AI"
-    ]
-}
+# Gaming tests only
+for test in prompts_personal.GAMING_TESTS:
+    responses = analyzer.test_consistency(test)
 
-responses = analyzer.test_consistency(test_case)
+# Fitness tests only
+for test in prompts_personal.FITNESS_TESTS:
+    responses = analyzer.test_consistency(test)
+
 analyzer.save_results()
 ```
 
 ## Example Output
-```json
-{
-  "timestamp": "2025-01-19T10:30:00",
-  "test_type": "consistency",
-  "category": "ethics",
-  "prompt": "Is it okay to lie?",
-  "responses": [...],
-  "consistency_score": 0.85
-}
+
+```
+GAMING TESTS (Valorant & Smash Bros)
+============================================================
+Testing: valorant_strategy
+Criteria: Should consistently recommend similar beginner agents
+
+Prompt: What are the best Valorant agents for beginners?
+Response: For beginners, I'd recommend starting with agents like
+    Sage (healing and crowd control), Brimstone (straightforward
+    smokes), or Reyna (self-sufficient duelist)...
+
+Average consistency for valorant_strategy: 85.00%
 ```
 
-## Test Categories
+## Configuration
 
-### Consistency Tests
-Evaluates whether semantically similar prompts produce consistent responses.
+Adjust test parameters in `config.py`:
 
-### Refusal Tests
-Checks if the model appropriately handles requests for real-time data, personal info, or capabilities it doesn't have.
-
-### Format Tests
-Validates output structure and format consistency.
-
-## Extending the Framework
-
-Add new test categories in `prompts.py`:
 ```python
-NEW_TEST_CATEGORY = [
-    {
-        "category": "reasoning",
-        "variations": [
-            "Solve: 2+2",
-            "What is two plus two?",
-            "Calculate 2+2"
-        ]
-    }
-]
+NUM_ITERATIONS = 5  # Tests per prompt variation
+DEFAULT_TEMPERATURE = 0.7  # Response randomness
+MAX_TOKENS = 1000  # Response length
 ```
 
-## Results Analysis
 
-Results are saved as JSON files in `results/` with timestamps. Use them to:
-- Track consistency metrics over time
-- Compare different models
-- Identify problematic prompt patterns
-- Generate quality reports
+## Use Cases
+
+**For Developers:**
+- Quality assurance before production deployment
+- Regression testing across model versions
+- Identifying inconsistent behaviors
+
+**For Researchers:**
+- Measuring LLM consistency across domains
+- Comparing different models
+- Studying prompt sensitivity
+
+**For Fun:**
+- See how well AI understands your hobbies
+- Test if LLMs give good gaming/fitness/tea advice
+- Experiment with creative crossover questions
 
 ## Technical Details
 
 - **Language**: Python 3.8+
-- **Dependencies**: Anthropic SDK, OpenAI SDK, Pandas
-- **Rate Limiting**: Built-in delays between requests
-- **Error Handling**: Graceful handling of API failures
+- **Primary Model**: Claude (Anthropic)
+- **Rate Limiting**: 1-second delays between requests
+- **Output Format**: JSON with timestamps and metadata
+
+## Key Findings
+
+Some interesting patterns discovered:
+
+1. **Gaming advice** tends to be highly consistent across phrasings
+2. **Fitness recommendations** show more variation (context-dependent)
+3. **Tea knowledge** is surprisingly consistent (well-documented domain)
+4. **Crossover questions** reveal creative reasoning abilities
+5. **Safety refusals** are consistent
 
 ## Roadmap
 
-- [ ] Support for GPT-4 and other models
-- [ ] Statistical analysis of consistency scores
+- [ ] Multi-model comparison (Claude vs GPT vs Gemini)
+- [ ] Statistical significance testing
 - [ ] Visualization dashboard
-- [ ] Automated regression testing
-- [ ] Multi-turn conversation analysis
+- [ ] More personal test categories (music, cooking, etc.)
+- [ ] Automated quality scoring
+- [ ] Integration with evaluation frameworks
 
-## Contributing
+## Why I Built This
 
-Contributions welcome! Areas of interest:
-- Additional test categories
-- New consistency metrics
+I wanted to test if LLMs could give consistent advice on topics I care about. Turns out, measuring "consistency" is harder than it looks and is super important for real-world AI applications. This puts things in perspective as a stepping stone for the Anthropic AI Fellowship.
+
+This project combines:
+- My interest in AI safety and evaluation
+- Practical testing of real-world use cases
+- Making technical work more engaging and fun
+
+
+**Areas of interest:**
+- Domain-specific test cases (sports, hobbies, skills)
+- Better consistency metrics
 - Visualization tools
-- Integration with eval frameworks
-
-## License
-
-MIT License
+- Multi-turn conversation testing
 
 
-Built for evaluating AI systems at scale, with applications in quality assurance, model comparison, and production reliability.
+*Built for evaluating AI systems at scale, with applications in quality assurance, model comparison, and production reliability. Also for settling debates about whether Claude or GPT gives better Valorant advice.* 
+
+
+# Future Updates if Admitted to Fellowship 
+Add interactive CLI
+Comparison mode to different models
+Add visualization with matlab or Python's `matplotlib`
